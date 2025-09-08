@@ -1,0 +1,43 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, excerpt, date, readTime, image } = post.data;
+const slug = post.slug;
+const formattedDate = date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+});
+---
+<article class="group p-6 rounded-none border-[var(--page-border)] border bg-[var(--page-paper)] hover:bg-[var(--page-text)]">
+    <a href={`/blog/${slug}`} class="group/image block mb-6 overflow-hidden">
+      <Image 
+        src={image} 
+        alt={title} 
+        width={800} height={450} 
+        class="w-full h-48 object-cover border-[var(--page-border)] border group-hover:border-[var(--page-bg)] group-hover/image:border-[var(--page-accent)]" />
+    </a>
+    <div class="flex items-center gap-3 text-[var(--page-text-secondary)] mb-4 font-mono text-xs group-hover:text-[var(--page-bg)]">
+      <span>{formattedDate}</span>
+      <span>•</span>
+      <span>{readTime}</span>
+    </div>
+    <a href={`/blog/${slug}`} class="block text-[var(--page-text)] group-hover:text-[var(--page-bg)] hover:text-[var(--page-accent)] hover:underline hover:decoration-[var(--page-accent)]">
+      <h3 class="font-display text-xl font-semibold mb-4 leading-tight">{title}</h3>
+    </a>
+    <p class="text-[var(--page-text-secondary)] mb-6 leading-relaxed text-sm font-sans line-clamp-3 group-hover:text-[var(--page-bg)]">{excerpt}</p>
+    <a href={`/blog/${slug}`} class="inline-flex items-center text-[var(--page-text)] font-mono text-sm group-hover:text-[var(--page-bg)] hover:text-[var(--page-accent)] hover:underline hover:decoration-[var(--page-accent)]">
+      :read
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="ml-2 h-3 w-3" fill="currentColor"><path d="M14 4l-1.41 1.41L16.17 9H2v2h14.17l-3.58 3.59L14 16l6-6-6-6z"/></svg>
+    </a>
+</article>
+
+<style>
+  /* No @apply directives here. Only custom CSS if needed. */
+</style>

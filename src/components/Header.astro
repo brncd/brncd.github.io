@@ -1,0 +1,210 @@
+---
+import ThemeToggleButton from './ThemeToggleButton.astro';
+import NavLink from './NavLink.astro';
+import { SITE_CONFIG } from '../site.config';
+
+---
+
+<nav id="sticky-nav" class="fixed top-0 left-1/2 z-50 w-full max-w-5xl bg-[var(--page-paper)] border border-[var(--page-border)]">
+  <div class="px-12 md:px-16 lg:px-20 py-4 flex items-center justify-between">
+      <a href="/" class="navbar-title font-display text-xl font-bold text-[var(--page-text)] cursor-pointer -ml-2">
+        <span id="navbar-title-sticky" class="p-2 hover:bg-[var(--page-text)] hover:text-[var(--page-bg)]">&nbsp;</span>
+      </a>
+      <div class="hidden md:flex items-center space-x-8">
+        {SITE_CONFIG.nav.map(item => (
+          <NavLink href={item.href}>{item.label}</NavLink>
+        ))}
+        <ThemeToggleButton id="theme-toggle-button-sticky" />
+      </div>
+      <!-- Mobile Menu Button -->
+      <div class="md:hidden">
+        <button id="mobile-menu-button-sticky" type="button" aria-label="Open menu" class="text-[var(--page-text)] p-2 -m-2 cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><rect x="2" y="5" width="20" height="2" /><rect x="2" y="11" width="20" height="2" /><rect x="2" y="17" width="20" height="2" /></svg>
+        </button>
+      </div>
+  </div>
+</nav>
+
+<nav class="bg-[var(--page-paper)] pt-8 pb-4 border-b border-[var(--page-border)]">
+    <div class="px-12 md:px-16 lg:px-20">
+        <div class="flex items-center justify-between">
+            <a href="/" class="navbar-title font-display text-xl font-bold text-[var(--page-text)] cursor-pointer -ml-2">
+              <span id="navbar-title-main" class="p-2 hover:bg-[var(--page-text)] hover:text-[var(--page-bg)]">&nbsp;</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                {SITE_CONFIG.nav.map(item => (
+                    <NavLink href={item.href}>{item.label}</NavLink>
+                ))}
+                <ThemeToggleButton id="theme-toggle-button-main" />
+            </div>
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+              <button id="mobile-menu-button-main" type="button" aria-label="Open menu" class="text-[var(--page-text)] p-2 -m-2 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><rect x="2" y="5" width="20" height="2" /><rect x="2" y="11" width="20" height="2" /><rect x="2" y="17" width="20" height="2" /></svg>
+              </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu Panel -->
+<div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-[var(--page-paper)] z-[999] transform translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+  <div class="flex justify-end p-8">
+    <button id="close-menu-button" type="button" aria-label="Close menu" class="text-[var(--page-text)] p-2 -m-2 cursor-pointer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><polygon points="21 6 20 5 18 5 18 6 17 6 17 7 16 7 16 8 15 8 15 9 14 9 14 10 13 10 13 11 12 11 12 13 11 13 11 14 10 14 10 15 9 15 9 16 8 16 8 17 7 17 7 18 6 18 6 19 5 19 5 20 4 20 4 21 6 21 7 20 7 19 8 19 8 18 9 18 9 17 10 17 10 16 11 16 11 15 12 15 12 14 13 14 13 15 14 15 14 16 15 16 15 17 16 17 16 18 17 18 17 19 18 19 18 20 19 20 19 21 21 19 20 18 20 17 19 17 19 16 18 16 18 15 17 15 17 14 16 14 16 13 15 13 15 12 14 12 14 11 13 11 13 10 12 10 12 8 13 8 13 7 14 7 14 6 15 6 15 5 16 5 16 4 17 4 17 3 18 3 18 2 20 2 20 3 21 3 21 4 22 4 22 6 21 6"/></svg>
+    </button>
+  </div>
+  <div class="flex flex-col items-center justify-center h-full -mt-20 text-center">
+    {SITE_CONFIG.nav.map(item => (
+      <a href={item.href} class="mobile-nav-link font-mono text-2xl text-[var(--page-text)] py-4">{item.label}</a>
+    ))}
+    <div class="mt-8">
+      <ThemeToggleButton id="theme-toggle-button-mobile" />
+    </div>
+  </div>
+</div>
+
+<style>
+  .sun-icon { display: block; }
+  .moon-icon { display: none; }
+
+  #sticky-nav {
+    /* Start hidden above the viewport and centered */
+    transform: translateX(-50%) translateY(-150%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.4s ease;
+  }
+
+  #sticky-nav[data-visible="true"] {
+    /* Move to its final position */
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .navbar-title {
+    min-width: 8rem; /* Reserves enough space for '~/portfolio' */
+    text-align: left;
+  }
+</style>
+
+<script is:inline>
+  function setupStickyNav() {
+    const stickyNav = document.getElementById('sticky-nav');
+    if (!stickyNav) return;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const isVisible = stickyNav.dataset.visible === 'true';
+
+      if (scrollY > 150 && !isVisible) {
+        stickyNav.dataset.visible = 'true';
+      } else if (scrollY < 100 && isVisible) {
+        stickyNav.dataset.visible = 'false';
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+  }
+
+  function setupThemeToggle() {
+    const themeToggleButtons = [
+      document.getElementById('theme-toggle-button-sticky'),
+      document.getElementById('theme-toggle-button-main'),
+      document.getElementById('theme-toggle-button-mobile')
+    ].filter(el => !!el);
+
+    themeToggleButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      });
+    });
+  }
+
+  function setupDynamicNavbarTitle() {
+    const navbarTitleMain = document.getElementById('navbar-title-main');
+    const navbarTitleSticky = document.getElementById('navbar-title-sticky');
+    if (!navbarTitleMain || !navbarTitleSticky) return;
+
+    const sections = document.querySelectorAll('#about, #projects, #blog, #contact');
+
+    if (sections.length > 0) {
+      // Homepage logic: Update title and link based on scroll position
+      const handleNavTitleScroll = () => {
+        let activeSectionId = '';
+        for (const section of sections) {
+          // The elements are HTMLElements, so we can safely access offsetTop
+          if (window.scrollY >= section['offsetTop'] - window.innerHeight / 2) {
+            activeSectionId = section.id;
+          }
+        }
+        const newTitle = activeSectionId ? `~/${activeSectionId}` : '~/portfolio';
+        const newHref = activeSectionId ? `#${activeSectionId}` : '/';
+
+        if (navbarTitleMain.textContent !== newTitle) {
+          navbarTitleMain.textContent = newTitle;
+          navbarTitleSticky.textContent = newTitle;
+          if (navbarTitleMain.parentElement) navbarTitleMain.parentElement.setAttribute('href', newHref);
+          if (navbarTitleSticky.parentElement) navbarTitleSticky.parentElement.setAttribute('href', newHref);
+        }
+      };
+      window.addEventListener('scroll', handleNavTitleScroll, { passive: true });
+      handleNavTitleScroll();
+    } else {
+      // Subpage logic: Set a static title and link based on the URL
+      const path = window.location.pathname;
+      const pathSegments = path.split('/').filter(Boolean);
+      const isBlogDetailPage = path.startsWith('/blog') && pathSegments.length > 1;
+      
+      const newTitle = isBlogDetailPage ? '../blog' : (path.startsWith('/blog') ? '~/blog' : '~/portfolio');
+      const newHref = path.startsWith('/blog') ? '/blog' : '/';
+      
+      navbarTitleMain.textContent = newTitle;
+      navbarTitleSticky.textContent = newTitle;
+      if (navbarTitleMain.parentElement) navbarTitleMain.parentElement.setAttribute('href', newHref);
+      if (navbarTitleSticky.parentElement) navbarTitleSticky.parentElement.setAttribute('href', newHref);
+    }
+  }
+
+  function setupMobileMenu() {
+    const openButtons = [
+      document.getElementById('mobile-menu-button-main'),
+      document.getElementById('mobile-menu-button-sticky')
+    ].filter(el => !!el);
+    const closeButton = document.getElementById('close-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (!mobileMenu || !closeButton || openButtons.length === 0) return;
+
+    const mobileNavLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+
+    const openMenu = () => mobileMenu.classList.remove('translate-x-full');
+    const closeMenu = () => mobileMenu.classList.add('translate-x-full');
+
+    openButtons.forEach(btn => btn.addEventListener('click', openMenu));
+    closeButton.addEventListener('click', closeMenu);
+    mobileNavLinks.forEach(link => link.addEventListener('click', closeMenu));
+  }
+
+  // Persist theme during View Transitions
+  document.addEventListener('astro:before-swap', (event) => {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+      event.newDocument.documentElement.classList.add('dark');
+    }
+    // Close mobile menu on page navigation
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu && !mobileMenu.classList.contains('translate-x-full')) {
+      mobileMenu.classList.add('translate-x-full');
+    }
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    setupStickyNav();
+    setupThemeToggle();
+    setupDynamicNavbarTitle();
+    setupMobileMenu();
+  });
+</script>

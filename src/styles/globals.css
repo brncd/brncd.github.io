@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.font-display {
+    font-family: 'Funnel Display', monospace;
+}
+
+/* Light Theme Variables - Inferred from original design and dark theme */
+/* Light Theme: Gruvbox Light */
+:root {
+  --page-bg: #fbf1c7;
+  --page-paper: #f9f5d7;
+  --page-text: #3c3836;
+  --page-text-secondary: #7c6f64;
+  --page-accent: #d65d0e;
+  --page-border: #d5c4a1;
+  --page-button: #458588;
+  --page-button-hover: #076678;
+  --page-tag: #ebdbb2;
+  --page-tag-text: #3c3836;
+  --page-tag-border: #d5c4a1;
+  --page-text-inverted: #fbf1c7;
+  --page-bg-inverted: #3c3836;
+  --page-accent-hover: #af3a03;
+  --page-text-secondary-hover: #282828;
+  --page-text-secondary-hover-muted: #928374;
+  --page-tag-hover: #d5c4a1;
+  --page-tag-text-hover: #282828;
+  --page-tag-border-hover: #bdae93;
+}
+
+/* Dark Theme: Gruvbox Dark Hard */
+.dark {
+  --page-bg: #1d2021;
+  --page-paper: #282828;
+  --page-text: #ebdbb2;
+  --page-text-secondary: #a89984;
+  --page-accent: #fe8019;
+  --page-border: #504945;
+  --page-button: #83a598;
+  --page-button-hover: #458588;
+  --page-tag: #3c3836;
+  --page-tag-text: #ebdbb2;
+  --page-tag-border: #665c54;
+  --page-text-inverted: #1d2021;
+  --page-bg-inverted: #ebdbb2;
+  --page-accent-hover: #d65d0e;
+  --page-text-secondary-hover: #fbf1c7;
+  --page-text-secondary-hover-muted: #928374;
+  --page-tag-hover: #665c54;
+  --page-tag-text-hover: #fbf1c7;
+  --page-tag-border-hover: #928374;
+}
+
+/* Handles showing/hiding the sun/moon icons */
+.sun-icon { display: block; }
+.moon-icon { display: none; }
+html.dark .sun-icon { display: none; }
+html.dark .moon-icon { display: block; }
+
+body {
+  background-color: var(--page-bg);
+  background-image: radial-gradient(var(--page-border) 1px, transparent 0);
+  background-size: 25px 25px;
+  background-attachment: fixed;
+  font-family: 'Lora', serif;
+  transition: background-color 0.5s ease;
+}

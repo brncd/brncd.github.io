@@ -1,0 +1,84 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+// 1. Genera una página para cada post del blog
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const formattedDate = post.data.date.toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+});
+---
+<Layout title={post.data.title} description={post.data.excerpt}>
+  <div 
+    id="page-wrapper" 
+    class="bg-transparent min-h-screen transition-colors duration-500 relative py-8">
+    <div id="main-content" class="max-w-5xl mx-auto bg-[var(--page-paper)] border-[var(--page-border)] border">
+      <Header />
+      <main class="pt-20 pb-12 px-12 md:px-16 lg:px-20">
+        <article class="max-w-3xl mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="font-display text-4xl md:text-5xl font-bold text-[var(--page-text)] mb-4">{post.data.title}</h1>
+                <div class="flex items-center justify-center gap-4 text-[var(--page-text-secondary)] font-mono text-sm">
+                    <span>{formattedDate}</span>
+                    <span>•</span>
+                    <span>{post.data.readTime}</span>
+                </div>
+            </div>
+
+            <div class="mb-12">
+                <Image 
+                  src={post.data.image} 
+                  alt={post.data.title} 
+                  width={1200} height={675} 
+                  class="w-full h-auto object-cover border-[var(--page-border)] border" />
+            </div>
+
+            <div class="prose-styles">
+                <Content />
+            </div>
+
+            <div class="text-center mt-16">
+                <a href="/blog" class="inline-flex items-center text-[var(--page-text)] font-mono px-6 py-2 border border-[var(--page-border)] hover:bg-[var(--page-text)] hover:text-[var(--page-bg)] transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="mr-2 h-4 w-4" fill="currentColor"><path d="M10 16l1.41-1.41L7.83 11H22V9H7.83l3.58-3.59L10 4l-6 6 6 6z"/></svg>
+                    Volver al blog
+                </a>
+            </div>
+        </article>
+      </main>
+      <Footer />
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+    .prose-styles { color: var(--page-text); font-family: 'Lora', serif; line-height: 1.7; }
+    .prose-styles h1, .prose-styles h2, .prose-styles h3, .prose-styles h4 { color: var(--page-text); font-family: 'Funnel Display', 'IBM Plex Mono', monospace; margin-top: 2em; margin-bottom: 1em; }
+    .prose-styles a { color: var(--page-accent); text-decoration: underline; transition: color 0.3s; }
+    .prose-styles a:hover { color: var(--page-accent-hover); }
+    .prose-styles strong { color: var(--page-text); }
+    .prose-styles code { background-color: var(--page-tag); color: var(--page-tag-text); padding: 0.2em 0.4em; border-radius: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+    .prose-styles pre { background-color: var(--page-text-inverted); color: var(--page-bg-inverted); padding: 1em; overflow-x: auto; border: 1px solid var(--page-border); margin: 2em 0; }
+    .prose-styles pre code { background-color: transparent; padding: 0; }
+    .prose-styles blockquote { border-left: 4px solid var(--page-accent); padding-left: 1em; color: var(--page-text-secondary); font-style: italic; }
+    .prose-styles ul, .prose-styles ol { padding-left: 1.5em; margin: 1em 0; }
+    .prose-styles li::marker { color: var(--page-accent); }
+</style>

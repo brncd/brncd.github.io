@@ -1,0 +1,271 @@
+---
+import { getCollection } from 'astro:content';
+import ProjectCard from './ProjectCard.astro';
+import { SITE_CONFIG } from '../site.config';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => (a.data.order || 99) - (b.data.order || 99)
+);
+
+const featuredTags = SITE_CONFIG.projects.featuredTags;
+---
+<section id="projects" class="py-20 px-12 md:px-16 lg:px-20">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="font-display text-4xl font-bold mb-6 text-[var(--page-text)] text-center flex items-center justify-center gap-4">
+      <svg id="folder-open-solid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-9 w-9 text-[var(--page-accent)]" fill="currentColor">
+        <polygon points="2 16 1 16 1 3 2 3 2 2 9 2 9 3 10 3 10 4 19 4 19 5 20 5 20 9 5 9 5 10 4 10 4 12 3 12 3 14 2 14 2 16"/>
+        <polygon points="23 10 23 12 22 12 22 14 21 14 21 16 20 16 20 18 19 18 19 21 18 21 18 22 3 22 3 21 2 21 2 18 3 18 3 16 4 16 4 14 5 14 5 12 6 12 6 10 23 10"/>
+      </svg>
+      <span>Proyectos</span>
+    </h2>
+    <p class="text-xl text-[var(--page-text-secondary)] mb-12 text-center max-w-2xl mx-auto font-serif">
+      // Algunos de los proyectos en los que he trabajado recientemente.
+    </p>
+
+    <!-- Tags Filter -->
+    <div 
+      class="project-controls-container mb-8 font-mono text-sm border-b border-[var(--page-border)]"
+      data-featured-tags={JSON.stringify(featuredTags)}
+    >
+      <div id="project-tags-container" class="project-tags-container flex">
+        <!-- Tabs are injected here by the script -->
+      </div>
+    </div>
+
+    <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {projects.map((project) => (
+        <ProjectCard {project} />
+      ))}
+    </div>
+    <p id="no-results-message" class="hidden text-center text-[var(--page-text-secondary)] font-serif py-12">
+      // No se encontraron proyectos que coincidan con tu búsqueda.
+    </p>
+  </div>
+</section>
+
+<script is:inline>
+  function setupProjectFilters() {
+    const controlsContainer = document.querySelector('.project-controls-container');
+    const tagsContainer = document.getElementById('project-tags-container');
+    const projectsGrid = document.getElementById('projects-grid');
+    if (!projectsGrid || !tagsContainer || !controlsContainer) return;
+
+    const projectCards = Array.from(projectsGrid.children);
+    const noResultsMessage = document.getElementById('no-results-message');
+    let activeTag = '';
+
+    // These are the tags that will be displayed as filter tabs.
+    const featuredTags = JSON.parse(controlsContainer.dataset.featuredTags || '[]');
+    const baseTabs = [
+      { tag: '', label: 'Todos' },
+      ...featuredTags.map(t => ({ tag: t, label: t }))
+    ];
+
+    // Render the filter tabs.
+    tagsContainer.innerHTML = baseTabs.map(({ tag, label }) =>
+        `<button type="button" data-tag="${tag}" class="project-tag-tab">${label}</button>`
+    ).join('');
+
+
+    function filterProjects() {
+      let visibleCount = 0;
+      projectCards.forEach(card => {
+        const cardTags = Array.from(card.querySelectorAll('[data-tag]')).map(el => el.dataset.tag);
+        const tagMatch = activeTag === '' || cardTags.includes(activeTag);
+
+        if (tagMatch) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      noResultsMessage.classList.toggle('hidden', visibleCount > 0);
+
+      // --- DYNAMIC TAB LOGIC ---
+      const isActiveTagFeatured = featuredTags.includes(activeTag) || activeTag === '';
+      
+      // If a non-featured tag is active, ensure its tab exists
+      if (!isActiveTagFeatured && !tagsContainer.querySelector(`[data-tag="${activeTag}"]`)) {
+        const newTab = document.createElement('button');
+        newTab.type = 'button';
+        newTab.dataset.tag = activeTag;
+        newTab.className = 'project-tag-tab';
+        newTab.textContent = activeTag;
+        newTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        tagsContainer.appendChild(newTab);
+      }
+
+      // Update active state on all tabs and remove any non-featured, non-active tabs
+      tagsContainer.querySelectorAll('.project-tag-tab').forEach(tab => {
+        const tag = tab.dataset.tag;
+        const isTabFeatured = featuredTags.includes(tag) || tag === '';
+        if (!isTabFeatured && tag !== activeTag) {
+          tab.remove();
+        } else {
+          tab.classList.toggle('active', tab.dataset.tag === activeTag);
+        }
+      });
+
+      // Update active state on all card tags for visual consistency
+      const allCardTags = projectsGrid.querySelectorAll('.project-tag-button');
+      allCardTags.forEach(button => {
+        button.classList.toggle('active', button.dataset.tag === activeTag);
+      });
+    }
+
+    const handleTagClick = (tag) => {
+      // If clicking the same tag, deactivate it (go to 'All'). Otherwise, activate the new tag.
+      activeTag = activeTag === tag ? '' : tag;
+      filterProjects();
+    }
+    
+    // Event Listeners
+    tagsContainer.addEventListener('click', (e) => {
+      if (e.target.matches('[data-tag]')) {
+        handleTagClick(e.target.dataset.tag);
+      }
+    });
+    
+    projectsGrid.addEventListener('click', (e) => {
+      const target = e.target.closest('[data-tag]');
+      if (target) {
+        const tag = target.dataset.tag;
+        handleTagClick(tag);
+        
+        const isFeatured = featuredTags.includes(tag) || tag === '';
+        if (!isFeatured) {
+          controlsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    });
+
+    // Set initial state
+    filterProjects();
+
+    // --- Scroll Fade Logic ---
+    function updateScrollFades() {
+      const { scrollWidth, clientWidth, scrollLeft } = tagsContainer;
+      const isScrollable = scrollWidth > clientWidth;
+      controlsContainer.classList.toggle('show-fade-left', isScrollable && scrollLeft > 1);
+      controlsContainer.classList.toggle('show-fade-right', isScrollable && scrollLeft < scrollWidth - clientWidth - 1);
+    }
+
+    tagsContainer.addEventListener('scroll', updateScrollFades, { passive: true });
+    const resizeObserver = new ResizeObserver(updateScrollFades);
+    resizeObserver.observe(tagsContainer);
+    
+    // Disconnect observer when Astro swaps the page to prevent memory leaks
+    document.addEventListener('astro:before-swap', () => resizeObserver.disconnect(), { once: true });
+    updateScrollFades(); // Initial check
+  }
+
+  document.addEventListener('astro:page-load', setupProjectFilters);
+</script>
+
+<style is:global>
+  /*
+    NOTE: 'is:global' is essential here. The tabs are created dynamically with
+    JavaScript, so Astro's default style scoping doesn't see them. This
+    attribute makes sure these styles are applied correctly.
+  */
+  .project-controls-container {
+    position: relative;
+  }
+
+  .project-controls-container::before,
+  .project-controls-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    opacity: 0;
+  }
+  .project-controls-container::before {
+    left: 0;
+    background: linear-gradient(to right, var(--page-paper) 30%, transparent);
+  }
+  .project-controls-container::after {
+    right: 0;
+    background: linear-gradient(to left, var(--page-paper) 30%, transparent);
+  }
+  .project-controls-container.show-fade-left::before { opacity: 1; }
+  .project-controls-container.show-fade-right::after { opacity: 1; }
+
+  .project-tags-container {
+    gap: 4px;
+    overflow-x: auto;
+    /* Add some padding to avoid the scrollbar visually clipping the tabs,
+       then use a negative margin to keep the alignment with the bottom border. */
+    padding-bottom: 1rem;
+    margin-bottom: -1rem;
+    /* Hide the scrollbar for a cleaner look */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    flex-wrap: nowrap;
+  }
+
+  #project-tags-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+
+  .project-tag-tab {
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--page-border);
+    border-bottom: none; /* Remove bottom border to prepare for the "connected" effect */
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    
+    /* A solid, visible background for inactive tabs */
+    background-color: var(--page-tag);
+    color: var(--page-text-secondary);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  /* A more pronounced hover effect consistent with the rest of the site */
+  .project-tag-tab:hover:not(.active) {
+    background-color: var(--page-text);
+    color: var(--page-bg);
+    /* Match border to background for a solid look on hover */
+    border-color: var(--page-text);
+  }
+
+  .project-tag-tab.active {
+    /* The active tab uses the main paper background to look connected */
+    background-color: var(--page-paper);
+    color: var(--page-accent);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* This pseudo-element covers the main bottom border right under the active tab */
+  .project-tag-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: -1px;
+    right: -1px;
+    height: 2px; /* Slightly thicker to ensure it covers the border line */
+    background: var(--page-paper);
+  }
+
+  /* Style for tags on cards when their filter is active */
+  #projects-grid .project-tag-button.active {
+    background-color: var(--page-accent);
+    color: var(--page-bg);
+    border-color: var(--page-accent);
+  }
+
+  /* On smaller screens, shrink tabs before scrolling */
+  @media (max-width: 768px) {
+    .project-tag-tab {
+      padding: 0.5rem 0.75rem;
+    }
+  }
+</style>

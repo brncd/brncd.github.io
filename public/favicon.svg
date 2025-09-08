@@ -1,0 +1,19 @@
+<!-- favicon.svg — Gruvbox Light simple -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Colors (Gruvbox Light) -->
+  <!-- bg: #fbf1c7 | fg: #3c3836 | accent: #458588 -->
+  <defs>
+    <style>
+      .bg { fill: #fbf1c7; }
+      .text { fill: #458588; font-family: monospace; font-weight: bold; font-size: 32px; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="12" class="bg"></rect>
+
+  <!-- Code symbol -->
+  <text x="50%" y="52%" text-anchor="middle" alignment-baseline="middle" class="text">
+    &lt;/&gt;
+  </text>
+</svg>

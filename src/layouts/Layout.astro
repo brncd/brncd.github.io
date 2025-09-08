@@ -1,0 +1,47 @@
+--- 
+import '@fontsource/funnel-display';
+import { ClientRouter } from 'astro:transitions';
+import '@fontsource/lora/400.css';
+import '@fontsource/lora/700.css';
+
+export interface Props { 
+	title: string; 
+	description: string; 
+} 
+
+const { title, description } = Astro.props; 
+--- 
+<!doctype html> 
+<html lang="es"> 
+	<head> 
+		<meta charset="UTF-8" /> 
+		<meta name="description" content={description} /> 
+		<meta name="viewport" content="width=device-width" /> 
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" /> 
+		<meta name="generator" content={Astro.generator} /> 
+		<ClientRouter />
+		<title>{title}</title> 
+
+		<script is:inline>
+			const theme = (() => {
+				if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+					return localStorage.getItem('theme');
+				}
+				// Default to light theme
+				return 'light'; 
+			})();
+
+			if (theme === 'dark') {
+				document.documentElement.classList.add('dark');
+			} else {
+				document.documentElement.classList.remove('dark');
+			}
+		</script>
+	</head> 
+	<body class="antialiased"> 
+		<slot /> 
+	</body> 
+</html> 
+<style is:global> 
+	@import '../styles/globals.css'; 
+</style>

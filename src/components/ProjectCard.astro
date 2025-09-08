@@ -1,0 +1,39 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { title, description, image, tags, link } = project.data;
+---
+<div class="group p-6 rounded-none border-[var(--page-border)] border bg-[var(--page-paper)] hover:bg-[var(--page-text)]">
+    <a href={link} target="_blank" class="group/image block mb-6 overflow-hidden">
+      <Image 
+        src={image} 
+        alt={title} 
+        width={800} height={450} 
+        class="w-full h-48 object-cover border-[var(--page-border)] border group-hover:border-[var(--page-bg)] group-hover/image:border-[var(--page-accent)]" />
+    </a>
+    <a href={link} class="block text-[var(--page-text)] group-hover:text-[var(--page-bg)] hover:text-[var(--page-accent)] hover:underline hover:decoration-[var(--page-accent)]">
+      <h3 class="font-display text-xl font-semibold mb-4 leading-tight">{title}</h3>
+    </a>
+    <p class="text-[var(--page-text-secondary)] mb-6 leading-relaxed text-sm font-sans line-clamp-3 group-hover:text-[var(--page-bg)]">{description}</p>
+    <div class="flex flex-wrap gap-2 mb-6">
+      {tags.map((tag) => (
+        <button type="button" data-tag={tag} class="project-tag-button text-xs px-3 py-1 bg-[var(--page-tag)] text-[var(--page-tag-text)] border-[var(--page-tag-border)] border cursor-pointer font-mono transition-colors duration-200 group-hover:bg-[var(--page-bg)] group-hover:text-[var(--page-text)] group-hover:border-[var(--page-bg)] hover:!bg-[var(--page-accent)] hover:!text-[var(--page-bg)] hover:!border-[var(--page-accent)]">
+          {tag}
+        </button>
+      ))}
+    </div>
+    <a href={link} class="inline-flex items-center text-[var(--page-text)] font-mono text-sm group-hover:text-[var(--page-bg)] hover:text-[var(--page-accent)] hover:underline hover:decoration-[var(--page-accent)]">
+      :open
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="ml-2 h-3 w-3" fill="currentColor"><path d="M18 14v6H4V6h6V4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6h-2z"/><path d="M16 2h6v6h-2V5.41L11.41 14 10 12.59 18.59 4H16V2z"/></svg>
+    </a>
+</div>
+
+<style>
+  /* No @apply directives here. Only custom CSS if needed. */
+</style>
